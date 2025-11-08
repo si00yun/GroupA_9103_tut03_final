@@ -26,42 +26,68 @@ function setup() {
 
 function draw() {
   background(bg);
-   for (let ring of rings){
-    drawCircle(ring);    // 绘制每一个“同样形状”的圆
+  for (let ring of rings){
+    if (ring.style === 'dots') {
+      drawDotMandala(ring);   // 小圆点同心图
+    } else {
+      drawCircle(ring);       // 辐条圆
+    }
   }
 }
+
 
 // ===== 生成圆的数据（位置/半径/配色） =====
 function generateLayout(){
   rings = [];
-  let attempts = 0; // 建立一个计数器，防止无限循环
-  let target = 12;  // 在页面中画10个圆
-  while (rings.length < target && attempts < 2000){
-    attempts++;
+  const S = min(width, height);
 
-    // 控制半径范围
-    let Rmin = min(width,height) * 0.04;   
-    let Rmax = min(width,height) * 0.10;   
-    let r = random(Rmin, Rmax);
+  // 两类圆的数量
+  const N_SPOKES = 5;
+  const N_DOTS   = 7;
 
-    // 随机位置
+  // 两类圆的尺寸范围
+  const Rmin_spokes = S * 0.08;
+  const Rmax_spokes = S * 0.13;
+  const Rmin_dots   = S * 0.05;
+  const Rmax_dots   = S * 0.08;
+
+  const pool = colorSet.slice(1);  // 颜色库（除背景）
+
+  // 第一类：spokes
+  for (let i = 0; i < N_SPOKES; i++){
+    let r = random(Rmin_spokes, Rmax_spokes);
     let x = random(r + 20, width  - r - 20);
     let y = random(r + 20, height - r - 20);
 
-    // 为这个圆选 5 个配色，除去背景色
-    let pool = colorSet.slice(1);
     let palette = [
-      random(pool),   // 外环颜色
-      random(pool),   // 辐条颜色
-      random(pool),   // 中环颜色
-      random(pool),   // 点阵颜色
-      random(pool)    // 中心帽颜色
+      random(pool),
+      random(pool),
+      random(pool),
+      random(pool),
+      random(pool)
     ];
 
-    // 把这个圆的数据存进数组
-    rings.push({ x, y, r,palette });
+    rings.push({ x, y, r, palette, style: 'spokes' });
+  }
+
+  // 第二类：dots
+  for (let i = 0; i < N_DOTS; i++){
+    let r = random(Rmin_dots, Rmax_dots);
+    let x = random(r + 20, width  - r - 20);
+    let y = random(r + 20, height - r - 20);
+
+    let palette = [
+      random(pool),
+      random(pool),
+      random(pool),
+      random(pool),
+      random(pool)
+    ];
+
+    rings.push({ x, y, r, palette, style: 'dots' });
   }
 }
+
 
 // ===== 绘制圆（外环/辐条/中环/点阵/中心帽） =====
 function drawCircle(ring){
@@ -127,4 +153,66 @@ function drawCircle(ring){
   circle(ring.x, ring.y, ring.r * 0.24);
   fill(random(colorSet));
   circle(ring.x, ring.y, ring.r * 0.12);
+}
+
+
+function drawDotMandala(ring){
+
+    // 放射线条
+  let nSpokes = 8;  //线条数量
+  strokeWeight(2);
+  stroke(ring.palette[1]);
+
+  for (let i = 0; i < nSpokes; i++){
+    let ang = i * TWO_PI / nSpokes; 
+    let x1 = ring.x + ring.r * 0.12 * cos(ang);
+    let y1 = ring.y + ring.r * 0.12 * sin(ang);
+    let x2 = ring.x + ring.r * 0.80 * cos(ang);
+    let y2 = ring.y + ring.r * 0.80 * sin(ang);
+    line(x1, y1, x2, y2);
+  }
+
+
+  // ---- 内圈 ----
+  let n1 = 8;                      // 内圈点数量
+  let r1 = ring.r * 0.22;          // 内圈半径
+  let s1 = ring.r * 0.10;          // 内圈点大小
+  fill(ring.palette[2]);
+
+  for (let i = 0; i < n1; i++){
+    let a = i * TWO_PI / n1;
+    let x = ring.x + r1 * cos(a);
+    let y = ring.y + r1 * sin(a);
+    circle(x, y, s1);
+  }
+
+  // ---- 中圈 ----
+  let n2 = 19;
+  let r2 = ring.r * 0.52;
+  let s2 = ring.r * 0.08;
+  fill(ring.palette[3]);
+
+  for (let i = 0; i < n2; i++){
+    let a = i * TWO_PI / n2;
+    let x = ring.x + r2 * cos(a);
+    let y = ring.y + r2 * sin(a);
+    circle(x, y, s2);
+  }
+
+  // ---- 外圈 ----
+  let n3 = 24;
+  let r3 = ring.r * 0.55;
+  let s3 = ring.r * 0.09;
+  fill(ring.palette[4]);
+
+  for (let i = 0; i < n3; i++){
+    let a = i * TWO_PI / n3;
+    let x = ring.x + r3 * cos(a);
+    let y = ring.y + r3 * sin(a);
+    circle(x, y, s3);
+  }
+
+  // 中心一个小圆
+  fill(ring.palette[0]);
+  circle(ring.x, ring.y, ring.r * 0.20);
 }
