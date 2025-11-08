@@ -41,7 +41,7 @@ function generateLayout(){
 
     // 控制半径范围
     let Rmin = min(width,height) * 0.04;   
-    let Rmax = min(width,height) * 0.12;   
+    let Rmax = min(width,height) * 0.10;   
     let r = random(Rmin, Rmax);
 
     // 随机位置
@@ -93,15 +93,33 @@ function drawCircle(ring){
 
 
   // 点阵圈
+  // 点阵圈 A（外圈）
   noStroke();
-  fill(ring.palette[3]);
-  let dots = int(ring.r / 4);
-  for (let i = 0; i < dots; i++){
-    let a = i * TWO_PI / dots;
-    let x = ring.x + ring.r * 0.38 * cos(a);
-    let y = ring.y + ring.r * 0.38 * sin(a);
-    circle(x, y, 6);
+  fill(ring.palette[3]);       // 原来的颜色
+  let dotsA = max(7, int(ring.r / 5));  
+  let rA = ring.r * 0.38;
+
+  for (let i = 0; i < dotsA; i++){
+    let a = i * TWO_PI / dotsA;
+    let x = ring.x + rA * cos(a);
+    let y = ring.y + rA * sin(a);
+    circle(x, y, 7);           // 固定大小
   }
+
+
+  // 点阵圈 B（内圈）
+  noStroke();
+  fill(ring.palette[1]);       // 用辐条色，形成层次感
+  let dotsB = max(3, int(ring.r / 5));
+  let rB = ring.r * 0.26;      // 半径明显大于内圈
+
+  for (let i = 0; i < dotsB; i++){
+    let a = i * TWO_PI / dotsB; 
+    let x = ring.x + rB * cos(a);
+    let y = ring.y + rB * sin(a);
+    circle(x, y, 6);           
+  }
+
 
   // 中心帽
   noStroke();
