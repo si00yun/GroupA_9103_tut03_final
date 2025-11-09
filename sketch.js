@@ -32,9 +32,34 @@ function draw() {
     } else {
       drawCircle(ring);       // 辐条圆
     }
+
+    moveAndBounce(ring);   // 更新位置 + 边缘反弹
   }
 }
 
+// 移动 + 边缘反弹
+function moveAndBounce(ring){
+  ring.x += ring.vx;
+  ring.y += ring.vy;
+
+  // 左右边界
+  if (ring.x < ring.r) {
+    ring.x = ring.r;
+    ring.vx *= -1;
+  } else if (ring.x > width - ring.r) {
+    ring.x = width - ring.r;
+    ring.vx *= -1;
+  }
+
+  // 上下边界
+  if (ring.y < ring.r) {
+    ring.y = ring.r;
+    ring.vy *= -1;
+  } else if (ring.y > height - ring.r) {
+    ring.y = height - ring.r;
+    ring.vy *= -1;
+  }
+}
 
 // ===== 生成圆的数据（位置/半径/配色） =====
 function generateLayout(){
@@ -67,7 +92,17 @@ function generateLayout(){
       random(pool)
     ];
 
-    rings.push({ x, y, r, palette, style: 'spokes' });
+    // 设置spokes的速度和方向
+    let Vmin = S * 0.002;     // 最慢速度
+    let Vmax = S * 0.010;     // 最快速度
+    let baseK = S * 0.3;      // 速度基准
+    let speed = baseK / r;    // 半径越大速度越慢
+    speed = constrain(speed, Vmin, Vmax);
+    let ang = random(TWO_PI); // 随机方向
+    let vx = cos(ang) * speed;
+    let vy = sin(ang) * speed;
+
+    rings.push({ x, y, r, palette, style: 'spokes', vx, vy });
   }
 
   // 第二类：dots
@@ -84,8 +119,24 @@ function generateLayout(){
       random(pool)
     ];
 
-    rings.push({ x, y, r, palette, style: 'dots' });
+ // set these dots speed和方向
+    let Vmin = S * 0.002;
+    let Vmax = S * 0.010;
+    let baseK = S * 0.7;
+    let speed = baseK / r;
+    speed = constrain(speed, Vmin, Vmax);
+    let ang = random(TWO_PI);
+    let vx = cos(ang) * speed;
+    let vy = sin(ang) * speed;
+
+    rings.push({ x, y, r, palette, style: 'dots', vx, vy });
   }
+}
+
+// ===== 窗口尺寸变化 =====
+function windowResized(){
+  resizeCanvas(windowWidth, windowHeight);
+  generateLayout();
 }
 
 
