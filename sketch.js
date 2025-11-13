@@ -30,7 +30,8 @@ function draw() {
     // Fall progress t (0-1) : Used to control the scaling and fading of halos
     // The circular figure starts from the top of the canvas and approaches 1 after passing through it
     const t = constrain((ring.y + ring.r) / (height + ring.r * 2), 0, 1);
-    // constrain()
+    //constrain() It is used to limit the calculated progress value within the range of 0 to 1 to avoid exceeding the interval.
+    // reference：https://p5js.org/reference/#/p5/constrain
      
     // Draw halos
     drawAura(ring, t);
