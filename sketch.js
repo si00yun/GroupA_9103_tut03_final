@@ -27,15 +27,44 @@ function setup() {
 function draw() {
   background(bg);
   for (let ring of rings){
-    if (ring.style === 'dots') {
-      drawDotMandala(ring);   // 小圆点同心图
+     // 下落进度 t（0~1）：用于控制光晕的缩放与淡出 
+    // 圆形图形从画布上方开始，穿过画布后接近 1
+    const t = constrain((ring.y + ring.r) / (height + ring.r * 2), 0, 1);
+
+     // 在圆形图形下面绘制扩散并渐隐的光晕
+    drawAura(ring, t);
+
+    // 圆形图形保持固定大小（不随 t 缩放）
+      if (ring.style === 'dots') {
+      drawDotMandala(ring);
     } else {
-      drawCircle(ring);       // 辐条圆
+      drawCircle(ring);
     }
-    fallAndReset(ring);      //调用下落函数
+
+    // 更新下落位置
+    fallAndReset(ring);     
   }
 }
 
+// 光晕随下落放大并淡出 
+function drawAura(ring, t) {
+  if (t <= 0) return;
+
+  // 选取调色板中的一种颜色
+  const c = ring.palette[1];
+
+  // alpha 随下落从 120 渐变到 0
+  const alpha = map(t, 0, 1, 120, 0);
+
+  // 半径从 1.0 倍扩大到约 2.6 倍
+  const rr = ring.r * (1 + 1.6 * t);
+
+  noStroke();
+  fill(red(c), green(c), blue(c), alpha);
+  circle(ring.x, ring.y, rr * 2);
+}
+
+// 控制圆形图形下落与重置 
 function fallAndReset(ring){
   ring.y += ring.vy;  // Update the position through speed
 
@@ -43,6 +72,7 @@ function fallAndReset(ring){
     ring.y =- ring.r;  //Let the small ball keep falling
     ring.x = random(ring.r, width-ring.r); //Random x position
     ring.vy = random(1,3);  //New falling velocity
+    
     //random color
     ring.palette = [
       random(colorSet.slice(1)),
