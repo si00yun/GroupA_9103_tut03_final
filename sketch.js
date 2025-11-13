@@ -1,7 +1,7 @@
 
-let bg;                //存放背景颜色
-let colorSet;          //存放所有颜色
-let rings = [];       // 保存每个圆的随机参数（位置/半径/配色）
+let bg;                //Store the background color
+let colorSet;          //Store all colors
+let rings = [];       //Save the random parameters (position/radius/color matching) of each circle
 
 function setup() {
   //Create a canvas as large as the current browser window
@@ -27,23 +27,55 @@ function setup() {
 function draw() {
   background(bg);
   for (let ring of rings){
-    if (ring.style === 'dots') {
-      drawDotMandala(ring);   // 小圆点同心图
+    // Fall progress t (0-1) : Used to control the scaling and fading of halos
+    // The circular figure starts from the top of the canvas and approaches 1 after passing through it
+    const t = constrain((ring.y + ring.r) / (height + ring.r * 2), 0, 1);
+    //constrain() It is used to limit the calculated progress value within the range of 0 to 1 to avoid exceeding the interval.
+    // reference：https://p5js.org/reference/#/p5/constrain
+     
+    // Draw halos
+    drawAura(ring, t);
+
+    //The circular figure maintains a fixed size (does not scale with t)
+      if (ring.style === 'dots') {
+      drawDotMandala(ring);
     } else {
-      drawCircle(ring);       // 辐条圆
+      drawCircle(ring);
     }
-    fallAndReset(ring);      //Call the fallen function
+
+    // Update the falling position
+    fallAndReset(ring);     
   }
 }
 
-function fallAndReset(ring){
-  ring.y += ring.vy;  //Update the location by speed
+//The halo amplifies and fades out as it falls
+function drawAura(ring, t) {
+  if (t <= 0) return;
 
-  if (ring.y > height + ring.r){ //If circles fall out of the canvas
-    ring.y =- ring.r;  //Let circles keep falling
-    ring.x = random(ring.r, width-ring.r); //Random X position
-    ring.vy = random(1,3);  //New fallen speed
-    //随机颜色
+  // Select a color from the palette
+  const c = ring.palette[1];
+
+  // alpha gradually decreases from 120 to 0 as it falls
+  const alpha = map(t, 0, 1, 120, 0);
+
+  // The radius has been expanded from 1.0 times to approximately 2.6 times
+  const rr = ring.r * (1 + 1.6 * t);
+
+  noStroke();
+  fill(red(c), green(c), blue(c), alpha);
+  circle(ring.x, ring.y, rr * 2);
+}
+
+//Control the drop and reset of the circular graphic
+function fallAndReset(ring){
+  ring.y += ring.vy;  // Update the position through speed
+
+  if (ring.y > height + ring.r){ //When the circle extends beyond the canvas
+    ring.y =- ring.r;  //Let the small ball keep falling
+    ring.x = random(ring.r, width-ring.r); //Random x position
+    ring.vy = random(1,3);  //New falling velocity
+    
+    //random color
     ring.palette = [
       random(colorSet.slice(1)),
       random(colorSet.slice(1)),
@@ -55,29 +87,30 @@ function fallAndReset(ring){
 }
 
 
-// ===== 生成圆的数据（位置/半径/配色） =====
+// ===== generate the data of the circle (position/radius/color scheme) =====
 function generateLayout(){
   rings = [];
   const S = min(width, height);
 
-  // 两类圆的数量
+  // The quantity of the two types of circles
   const N_SPOKES = 5;
   const N_DOTS   = 7;
 
-  // 两类圆的尺寸范围
-  const Rmin_spokes = S * 0.08;
-  const Rmax_spokes = S * 0.13;
+  // The size range of the two types of circles
+  const Rmin_spokes = S * 0.06;
+  const Rmax_spokes = S * 0.09;
   const Rmin_dots   = S * 0.05;
   const Rmax_dots   = S * 0.08;
 
-  const pool = colorSet.slice(1);  // 颜色库（除背景）
+  const pool = colorSet.slice(1);  // Color library (excluding background)
 
-  // 第一类：spokes
+  // 1.Spokes type: 
+  // It has spokes, an outer ring and a dot matrix ring, with a double-layer dot ending at the center.
   for (let i = 0; i < N_SPOKES; i++){
     let r = random(Rmin_spokes, Rmax_spokes);
     let x = random(r + 20, width  - r - 20);
     let y = random(- height, height);
-    let vy = random(3.2, 4.2); //Fallen velocity
+    let vy = random(3.8, 4.5); //falling velocity
     let palette = [
       random(pool),
       random(pool),
@@ -88,12 +121,12 @@ function generateLayout(){
      rings.push({ x, y, r, palette, style: 'spokes', vy });
   }
 
-  // 第二类：dots
+  // Dots type: A circle composed of concentric dot matrix rings and radiating rays.
   for (let i = 0; i < N_DOTS; i++){
     let r = random(Rmin_dots, Rmax_dots);
     let x = random(r + 20, width  - r - 20);
     let y = random(r + 20, height - r - 20);
-    let vy = random(1.7, 3.2);
+    let vy = random(2.5, 3.5);
     let palette = [
       random(pool),
       random(pool),
@@ -105,23 +138,23 @@ function generateLayout(){
   }
 }
 
-// ===== 窗口尺寸变化 =====
+// ===== Change in window size=====
 function windowResized(){
   resizeCanvas(windowWidth, windowHeight);
   generateLayout();
 }
 
 
-// ===== 绘制圆（外环/辐条/中环/点阵/中心帽） =====
+// ===== draw a Spokes type circle (outer ring/spoke/middle ring/lattice/center cap) =====
 function drawCircle(ring){
-  // 外粗环
+  // outer ring
   strokeWeight(max(2, ring.r * 0.08));
   stroke(ring.palette[0]);
   noFill();
   circle(ring.x, ring.y, ring.r * 2);
 
-  // 放射线条
-  let nSpokes = 15;  //线条数量
+  // spoke
+  let nSpokes = 15;  //Number of lines
   strokeWeight(2);
   stroke(ring.palette[1]);
 
@@ -134,17 +167,17 @@ function drawCircle(ring){
     line(x1, y1, x2, y2);
   }
 
-    // 中环
+    // middle ring
   strokeWeight(max(2, ring.r * 0.04));
   stroke(ring.palette[2]);
   noFill();
   circle(ring.x, ring.y, ring.r * 1.2);
 
 
-  // 点阵圈
-  // 点阵圈 A（外圈）
+  // lattice
+  // lattice A（outer ring）
   noStroke();
-  fill(ring.palette[3]);       // 原来的颜色
+  fill(ring.palette[3]);       // The original color
   let dotsA = max(7, int(ring.r / 5));  
   let rA = ring.r * 0.38;
 
@@ -152,15 +185,15 @@ function drawCircle(ring){
     let a = i * TWO_PI / dotsA;
     let x = ring.x + rA * cos(a);
     let y = ring.y + rA * sin(a);
-    circle(x, y, 7);           // 固定大小
+    circle(x, y, 7);           // fixed size
   }
 
 
-  // 点阵圈 B（内圈）
+  // lattice B（inter ring）
   noStroke();
-  fill(ring.palette[1]);       // 用辐条色，形成层次感
+  fill(ring.palette[1]);       // Use the spoke color to create a sense of layering
   let dotsB = max(3, int(ring.r / 5));
-  let rB = ring.r * 0.26;      // 半径明显大于内圈
+  let rB = ring.r * 0.26;      // The radius is significantly larger than the inner circle
 
   for (let i = 0; i < dotsB; i++){
     let a = i * TWO_PI / dotsB; 
@@ -170,7 +203,7 @@ function drawCircle(ring){
   }
 
 
-  // 中心帽
+  // center cap
   noStroke();
   fill(ring.palette[4]);
   circle(ring.x, ring.y, ring.r * 0.24);
@@ -178,11 +211,11 @@ function drawCircle(ring){
   circle(ring.x, ring.y, ring.r * 0.12);
 }
 
-
+// ===== draw a Dots type circle (outer ring/spoke/middle ring/lattice/center cap) =====
 function drawDotMandala(ring){
 
-    // 放射线条
-  let nSpokes = 8;  //线条数量
+    // spoke
+  let nSpokes = 8;  //Number of lines
   strokeWeight(2);
   stroke(ring.palette[1]);
 
@@ -196,10 +229,10 @@ function drawDotMandala(ring){
   }
 
 
-  // ---- 内圈 ----
-  let n1 = 8;                      // 内圈点数量
-  let r1 = ring.r * 0.22;          // 内圈半径
-  let s1 = ring.r * 0.10;          // 内圈点大小
+  // ---- inter ring ----
+  let n1 = 8;                      // The number of inner circle points
+  let r1 = ring.r * 0.22;          // Inner circle radius
+  let s1 = ring.r * 0.10;          // The size of the inner circle point
   fill(ring.palette[2]);
 
   for (let i = 0; i < n1; i++){
@@ -209,7 +242,7 @@ function drawDotMandala(ring){
     circle(x, y, s1);
   }
 
-  // ---- 中圈 ----
+  //---- middle ring ----
   let n2 = 19;
   let r2 = ring.r * 0.52;
   let s2 = ring.r * 0.08;
@@ -222,7 +255,7 @@ function drawDotMandala(ring){
     circle(x, y, s2);
   }
 
-  // ---- 外圈 ----
+  // ---- outer ring ----
   let n3 = 24;
   let r3 = ring.r * 0.55;
   let s3 = ring.r * 0.09;
@@ -235,7 +268,7 @@ function drawDotMandala(ring){
     circle(x, y, s3);
   }
 
-  // 中心一个小圆
+  // small circle in the center
   fill(ring.palette[0]);
   circle(ring.x, ring.y, ring.r * 0.20);
 }
