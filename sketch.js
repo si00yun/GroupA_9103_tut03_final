@@ -138,7 +138,7 @@ function generateLayout(){
   }
 }
 
-// ===== 窗口尺寸变化 =====
+// ===== Change in window size=====
 function windowResized(){
   resizeCanvas(windowWidth, windowHeight);
   generateLayout();
@@ -154,7 +154,7 @@ function drawCircle(ring){
   circle(ring.x, ring.y, ring.r * 2);
 
   // spoke
-  let nSpokes = 15;  //线条数量
+  let nSpokes = 15;  //Number of lines
   strokeWeight(2);
   stroke(ring.palette[1]);
 
@@ -177,7 +177,7 @@ function drawCircle(ring){
   // lattice
   // lattice A（outer ring）
   noStroke();
-  fill(ring.palette[3]);       // 原来的颜色
+  fill(ring.palette[3]);       // The original color
   let dotsA = max(7, int(ring.r / 5));  
   let rA = ring.r * 0.38;
 
@@ -185,15 +185,15 @@ function drawCircle(ring){
     let a = i * TWO_PI / dotsA;
     let x = ring.x + rA * cos(a);
     let y = ring.y + rA * sin(a);
-    circle(x, y, 7);           // 固定大小
+    circle(x, y, 7);           // fixed size
   }
 
 
   // lattice B（inter ring）
   noStroke();
-  fill(ring.palette[1]);       // 用辐条色，形成层次感
+  fill(ring.palette[1]);       // Use the spoke color to create a sense of layering
   let dotsB = max(3, int(ring.r / 5));
-  let rB = ring.r * 0.26;      // 半径明显大于内圈
+  let rB = ring.r * 0.26;      // The radius is significantly larger than the inner circle
 
   for (let i = 0; i < dotsB; i++){
     let a = i * TWO_PI / dotsB; 
@@ -215,7 +215,7 @@ function drawCircle(ring){
 function drawDotMandala(ring){
 
     // spoke
-  let nSpokes = 8;  //线条数量
+  let nSpokes = 8;  //Number of lines
   strokeWeight(2);
   stroke(ring.palette[1]);
 
