@@ -27,36 +27,37 @@ function setup() {
 function draw() {
   background(bg);
   for (let ring of rings){
-     // 下落进度 t（0~1）：用于控制光晕的缩放与淡出 
-    // 圆形图形从画布上方开始，穿过画布后接近 1
+    // Fall progress t (0-1) : Used to control the scaling and fading of halos
+    // The circular figure starts from the top of the canvas and approaches 1 after passing through it
     const t = constrain((ring.y + ring.r) / (height + ring.r * 2), 0, 1);
-
-     // 在圆形图形下面绘制扩散并渐隐的光晕
+    // constrain()
+     
+    // Draw halos
     drawAura(ring, t);
 
-    // 圆形图形保持固定大小（不随 t 缩放）
+    //The circular figure maintains a fixed size (does not scale with t)
       if (ring.style === 'dots') {
       drawDotMandala(ring);
     } else {
       drawCircle(ring);
     }
 
-    // 更新下落位置
+    // Update the falling position
     fallAndReset(ring);     
   }
 }
 
-// 光晕随下落放大并淡出 
+//The halo amplifies and fades out as it falls
 function drawAura(ring, t) {
   if (t <= 0) return;
 
-  // 选取调色板中的一种颜色
+  // Select a color from the palette
   const c = ring.palette[1];
 
-  // alpha 随下落从 120 渐变到 0
+  // alpha gradually decreases from 120 to 0 as it falls
   const alpha = map(t, 0, 1, 120, 0);
 
-  // 半径从 1.0 倍扩大到约 2.6 倍
+  // The radius has been expanded from 1.0 times to approximately 2.6 times
   const rr = ring.r * (1 + 1.6 * t);
 
   noStroke();
@@ -64,7 +65,7 @@ function drawAura(ring, t) {
   circle(ring.x, ring.y, rr * 2);
 }
 
-// 控制圆形图形下落与重置 
+//Control the drop and reset of the circular graphic
 function fallAndReset(ring){
   ring.y += ring.vy;  // Update the position through speed
 
@@ -95,8 +96,8 @@ function generateLayout(){
   const N_DOTS   = 7;
 
   // The size range of the two types of circles
-  const Rmin_spokes = S * 0.08;
-  const Rmax_spokes = S * 0.13;
+  const Rmin_spokes = S * 0.06;
+  const Rmax_spokes = S * 0.09;
   const Rmin_dots   = S * 0.05;
   const Rmax_dots   = S * 0.08;
 
@@ -108,7 +109,7 @@ function generateLayout(){
     let r = random(Rmin_spokes, Rmax_spokes);
     let x = random(r + 20, width  - r - 20);
     let y = random(- height, height);
-    let vy = random(3.2, 4.2); //falling velocity
+    let vy = random(3.8, 4.5); //falling velocity
     let palette = [
       random(pool),
       random(pool),
@@ -124,7 +125,7 @@ function generateLayout(){
     let r = random(Rmin_dots, Rmax_dots);
     let x = random(r + 20, width  - r - 20);
     let y = random(r + 20, height - r - 20);
-    let vy = random(1.7, 3.2);
+    let vy = random(2.5, 3.5);
     let palette = [
       random(pool),
       random(pool),
