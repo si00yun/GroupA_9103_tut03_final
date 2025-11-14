@@ -77,8 +77,8 @@ function fallAndReset(ring){
     
     //random color
     ring.palette = [
-      random(colorSet.slice(1)),
-      random(colorSet.slice(1)),
+      random(colorSet.slice(1)),//Slice is to remove the background color and leave the rest
+      random(colorSet.slice(1)),//Reference: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/slice
       random(colorSet.slice(1)),
       random(colorSet.slice(1)),
       random(colorSet.slice(1)),
