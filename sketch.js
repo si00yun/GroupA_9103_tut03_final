@@ -62,8 +62,7 @@ function drawAura(ring, t) {
   const rr = ring.r * (1 + 1.6 * t);
 
   noStroke();
-  fill(red(c), green(c), blue(c), alpha);
-  circle(ring.x, ring.y, rr * 2);
+  fill(red(c), green(c), blue(c), alpha);  //Reference: red(), green(), blue() refer to the p5.js website.
 }
 
 //Control the drop and reset of the circular graphic
